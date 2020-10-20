@@ -16,6 +16,7 @@ import { PLANS_STORE } from '../constants';
  * Style dependencies
  */
 import './style.scss';
+import createPersistenceConfig from '@automattic/data-stores/dist/types/persistence-config-factory';
 
 const TickIcon = <Icon icon={ check } size={ 25 } />;
 
@@ -24,11 +25,59 @@ type Props = {
 };
 
 const PlansDetails: React.FunctionComponent< Props > = ( { onSelect } ) => {
-	const plansDetails = useSelect( ( select ) => select( PLANS_STORE ).getPlansDetails() );
+	const { __, i18nLocale } = useI18n();
+
+	const allPlansDetails = useSelect( ( select ) =>
+		select( PLANS_STORE ).getPlansDetails( i18nLocale )
+	);
+
+	const { features, featuresByType, plans } = allPlansDetails;
+
 	const prices = useSelect( ( select ) => select( PLANS_STORE ).getPrices() );
 	const supportedPlans = useSelect( ( select ) => select( PLANS_STORE ).getSupportedPlans() );
 
-	const { __ } = useI18n();
+	// Here we want to loop over the featuresByType and for each of those, look up the feature details
+
+	// It'd be like
+
+	// { plansDetails.map( ( detail ) => (
+	// 	<tbody key={ detail.id }>
+	// 		{ detail.name && (
+	// 			<tr className="plans-details__header-row">
+	// 				<th colSpan={ 6 }>{ detail.name }</th>
+	// 			</tr>
+	// 		) }
+	// 		{ detail.features.map( ( feature, i ) => (
+	// 			<tr className="plans-details__feature-row" key={ i }>
+	// 				<th>{ feature.name }</th>
+	// 				{ feature.data?.map( ( value, j ) => (
+	// 					<td key={ j }>
+	// 						{ feature.type === 'checkbox' &&
+	// 							( value ? (
+	// 								<>
+	// 									{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
+	// 									<span className="hidden">{ __( 'Available' ) }</span>
+	// 									{ TickIcon }
+	// 								</>
+	// 							) : (
+	// 								<>
+	// 									{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
+	// 									<span className="hidden">{ __( 'Unavailable' ) } </span>
+	// 								</>
+	// 							) ) }
+	// 						{ feature.type === 'text' && value }
+	// 					</td>
+	// 				) ) }
+	// 			</tr>
+	// 		) ) }
+	// 	</tbody>
+	// ) ) }
+
+	console.log( 'supported plans' );
+	console.log( supportedPlans );
+
+	console.log( 'features by type' );
+	console.log( featuresByType );
 
 	return (
 		<div className="plans-details">
@@ -41,32 +90,31 @@ const PlansDetails: React.FunctionComponent< Props > = ( { onSelect } ) => {
 						) ) }
 					</tr>
 				</thead>
-				{ plansDetails.map( ( detail ) => (
-					<tbody key={ detail.id }>
-						{ detail.name && (
+
+				{ featuresByType.map( ( featureType ) => (
+					<tbody key={ featureType.id }>
+						{ featureType.name && (
 							<tr className="plans-details__header-row">
-								<th colSpan={ 6 }>{ detail.name }</th>
+								<th colSpan={ 6 }>{ featureType.name }</th>
 							</tr>
 						) }
-						{ detail.features.map( ( feature, i ) => (
+						{ featureType.features?.map( ( feature: string, i ) => (
 							<tr className="plans-details__feature-row" key={ i }>
-								<th>{ feature.name }</th>
-								{ feature.data.map( ( value, j ) => (
+								<th>{ features[ feature ].name }</th>
+								{ supportedPlans.map( ( plan, j ) => (
 									<td key={ j }>
-										{ feature.type === 'checkbox' &&
-											( value ? (
-												<>
-													{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
-													<span className="hidden">{ __( 'Available' ) }</span>
-													{ TickIcon }
-												</>
-											) : (
-												<>
-													{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
-													<span className="hidden">{ __( 'Unavailable' ) } </span>
-												</>
-											) ) }
-										{ feature.type === 'text' && value }
+										{ plans[ plan.storeSlug ].featuresSlugs?.[ feature ] ? (
+											<>
+												{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
+												<span className="hidden">{ __( 'Available' ) }</span>
+												{ TickIcon }
+											</>
+										) : (
+											<>
+												{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
+												<span className="hidden">{ __( 'Unavailable' ) }</span>
+											</>
+										) }
 									</td>
 								) ) }
 							</tr>
