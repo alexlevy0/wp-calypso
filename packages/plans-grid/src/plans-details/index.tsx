@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import type { Plans } from '@automattic/data-stores';
 import { useI18n } from '@automattic/react-i18n';
 import { useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
@@ -16,12 +17,13 @@ import { PLANS_STORE } from '../constants';
  * Style dependencies
  */
 import './style.scss';
-import createPersistenceConfig from '@automattic/data-stores/dist/types/persistence-config-factory';
 
 const TickIcon = <Icon icon={ check } size={ 25 } />;
 
+type PlansSlug = Plans.PlanSlug;
+
 type Props = {
-	onSelect: Function;
+	onSelect: ( plan: PlansSlug ) => void;
 };
 
 const PlansDetails: React.FunctionComponent< Props > = ( { onSelect } ) => {
@@ -35,49 +37,6 @@ const PlansDetails: React.FunctionComponent< Props > = ( { onSelect } ) => {
 
 	const prices = useSelect( ( select ) => select( PLANS_STORE ).getPrices() );
 	const supportedPlans = useSelect( ( select ) => select( PLANS_STORE ).getSupportedPlans() );
-
-	// Here we want to loop over the featuresByType and for each of those, look up the feature details
-
-	// It'd be like
-
-	// { plansDetails.map( ( detail ) => (
-	// 	<tbody key={ detail.id }>
-	// 		{ detail.name && (
-	// 			<tr className="plans-details__header-row">
-	// 				<th colSpan={ 6 }>{ detail.name }</th>
-	// 			</tr>
-	// 		) }
-	// 		{ detail.features.map( ( feature, i ) => (
-	// 			<tr className="plans-details__feature-row" key={ i }>
-	// 				<th>{ feature.name }</th>
-	// 				{ feature.data?.map( ( value, j ) => (
-	// 					<td key={ j }>
-	// 						{ feature.type === 'checkbox' &&
-	// 							( value ? (
-	// 								<>
-	// 									{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
-	// 									<span className="hidden">{ __( 'Available' ) }</span>
-	// 									{ TickIcon }
-	// 								</>
-	// 							) : (
-	// 								<>
-	// 									{ /* eslint-disable-next-line wpcalypso/jsx-classname-namespace */ }
-	// 									<span className="hidden">{ __( 'Unavailable' ) } </span>
-	// 								</>
-	// 							) ) }
-	// 						{ feature.type === 'text' && value }
-	// 					</td>
-	// 				) ) }
-	// 			</tr>
-	// 		) ) }
-	// 	</tbody>
-	// ) ) }
-
-	console.log( 'supported plans' );
-	console.log( supportedPlans );
-
-	console.log( 'features by type' );
-	console.log( featuresByType );
 
 	return (
 		<div className="plans-details">
